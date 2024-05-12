@@ -18,13 +18,14 @@ webshell文件夹--检查可执行文件后门
 
 log文件夹--会将/var/log/*文件夹内容打包成压缩包
 Ashro_checkresult.txt   结尾的是脚本执行过程日志，这个比较友好可以从这里分析
+
 <img width="509" alt="image" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/806d9e04-6890-401a-a2ad-11af64598e7c">
 
-详细功能介绍:
-1.必须root权限运行
-2.收集IP地址信息
-3.查看正在登录的用户
-4.查看/etc/passwd
+详细功能介绍:<br>
+1.必须root权限运行<br>
+2.收集IP地址信息<br>
+3.查看正在登录的用户<br>
+4.查看/etc/passwd<br>
 5.检查是否存在超级用户
 6.空口令账户检测
 7.新增用户检查
