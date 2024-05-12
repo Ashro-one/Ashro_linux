@@ -17,3 +17,4 @@ webshell文件夹--检查可执行文件后门
 
 log文件夹--会将/var/log/*文件夹内容打包成压缩包
 
+<img width="509" alt="image" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/806d9e04-6890-401a-a2ad-11af64598e7c">
