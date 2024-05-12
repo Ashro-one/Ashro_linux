@@ -329,7 +329,7 @@ csv_file="$check_dir/command_hashes.csv"
 echo "Command Path,Hash Value" > "$csv_file"
 # 查找系统命令文件并计算哈希值
 find /bin /usr/bin -type f | while IFS= read -r file_path; do
-    hash_value=$(sha256sum "$file_path" | awk '{print $1}')
+    hash_value=$(md5sum "$file_path" | awk '{print $1}')
     echo "$file_path,$hash_value" >> "$csv_file"
 done
 
@@ -560,7 +560,7 @@ echo "正在打包日志......" | $Ashro_saveresult
 # 检查不同的 Linux 发行版，使用相应的打包命令，并将输出重定向到 /dev/null
 if command -v zip &>/dev/null; then
     # 如果 zip 命令可用，则使用 zip 进行打包，并将输出重定向到 /dev/null
-    #zip -r "${log_dir}system_log.zip"  /var/log/  &>/dev/null
+    zip -r "${log_dir}system_log.zip"  /var/log/  &>/dev/null
     if [ $? -eq 0 ]; then
         echo "[*]日志打包成功" | $Ashro_saveresult
     else
