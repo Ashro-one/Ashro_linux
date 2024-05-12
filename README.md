@@ -17,11 +17,10 @@ webshell文件夹--检查可执行文件后门
 
 log文件夹--会将/var/log/*文件夹内容打包成压缩包
 
-<img width="509" alt="image" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/806d9e04-6890-401a-a2ad-11af64598e7c">
 
 
 详细功能介绍:
-1.必须root权限运行\n
+1.必须root权限运行
 2.收集IP地址信息
 3.查看正在登录的用户
 4.查看/etc/passwd
@@ -69,3 +68,5 @@ log文件夹--会将/var/log/*文件夹内容打包成压缩包
 46.检查特定目录中是否存在可疑文件
 47.检查系统日志中是否包含可疑内容
 48.防火墙配置检测
+
+<img width="509" alt="image" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/806d9e04-6890-401a-a2ad-11af64598e7c">
