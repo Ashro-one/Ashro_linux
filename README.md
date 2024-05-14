@@ -5,7 +5,9 @@ Linux通用应急响应脚本，适用大多数情况
 脚本执行后生成的文件解释：
 danger_file.txt  脚本执行后的高危结果，对付看，结果需要经验分析，不要一股脑就认为风险项。
 
-<img width="486" alt="danger_file" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/a27255a6-9a9d-45b7-b06b-13a945aa8f0a">
+<img width="494" alt="danger_file" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/b21e31b6-41c5-48b8-b08b-8ae2e7d72c04">
+
+
 
 check_file文件夹--检查命令篡改
 weibu_md5.py 通过脚本获取系统上的命令配置文件的MD5值到check_file/*.csv文件中，进行微步的威胁情报查询，需要配置脚本中的自己api。脚本执行后会在当前目录生成结果文件。是否命令篡改结果一目了然。
