@@ -2,7 +2,8 @@ Linux通用应急响应脚本，适用大多数情况
 
 目前在ubuntu、centos7、kali上均可以正常运行。其他未实验 可以提供报错，针对修改。
 
-
+windows应急响应工具地<br>
+https://github.com/FindAllTeam/FindAll/
 
 脚本执行后生成的文件解释：
 danger_file.txt  脚本执行后的高危结果，对付看，结果需要经验分析，不要一股脑就认为风险项。
