@@ -195,17 +195,25 @@ printf "\n" | $Ashro_saveresult
 # 检测端口进程信息
 echo "************3.端口进程信息************"
 echo "------------网络连接---------------------" | $Ashro_saveresult
-# 病毒木马端口检测
-echo "------------病毒木马端口检测------------------" | $Ashro_saveresult
-echo "正在检测系统中的网络连接和监听端口....." | $Ashro_saveresult
+echo "------------病毒木马端口检测------------------" | $saveresult
+echo "正在检测系统中的网络连接和监听端口....." | $saveresult
 
 # 检查正在监听的端口
 listening_ports=$(netstat -tuln | awk 'NR > 2 {print $4}' | awk -F':' '{print $NF}' | sort -nu)
 if [ -n "$listening_ports" ]; then
-    echo "[*] 系统中正在监听的端口如下：" | tee -a "$danger_file" | $Ashro_saveresult
-    echo "$listening_ports" | tee -a "$danger_file" | $Ashro_saveresult
+    echo "[] 系统中正在监听的端口如下：" | $saveresult
+    echo "$listening_ports" | $saveresult
+
+    # 输出每个监听端口的详细信息
+    echo "------------详细的端口信息------------------" | $saveresult
+    for port in $listening_ports; do
+        echo "端口: $port" | $saveresult
+        # 使用 lsof 列出详细信息
+        lsof -i :$port | awk 'NR==1 || /LISTEN/' | $saveresult
+        echo "----------------------------------------" | $saveresult
+    done
 else
-    echo "[*] 系统中未发现正在监听的端口" | $Ashro_saveresult
+    echo "[] 系统中未发现正在监听的端口" | $saveresult
 fi
 
 # 检查建立的网络连接
