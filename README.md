@@ -76,3 +76,6 @@ Ashro_checkresult.txt   结尾的是脚本执行过程日志，这个比较友�
 
 windows应急响应工具地<br>
 https://github.com/FindAllTeam/FindAll/
+
+
+感谢 theLSA 老哥提到的debian系统出现的定时任务出现找不到文件情况。目前已解决    2024.06.24
