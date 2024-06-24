@@ -471,9 +471,8 @@ echo "------------分析用户定时任务-------------------" | $Ashro_saveresu
 echo "------------查看用户定时任务-------------------" | $Ashro_saveresult
 echo "正在查看用户定时任务....." | $Ashro_saveresult
 
-# 检查是否存在 /var/spool/cron 目录
+# 检查 /var/spool/cron 目录
 if [ -d "/var/spool/cron" ]; then
-    # 使用 ls 命令列出所有用户的定时任务
     for user_crontab in /var/spool/cron/*; do
         username=$(basename "$user_crontab")
         crontab_content=$(cat "$user_crontab" 2>/dev/null)
@@ -483,6 +482,69 @@ if [ -d "/var/spool/cron" ]; then
     done
 else
     echo "[!!!]未找到 /var/spool/cron 目录，无法查找用户定时任务" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /var/spool/cron/crontabs 目录
+if [ -d "/var/spool/cron/crontabs" ]; then
+    for user_crontab in /var/spool/cron/crontabs/*; do
+        username=$(basename "$user_crontab")
+        crontab_content=$(cat "$user_crontab" 2>/dev/null)
+        if [ -n "$crontab_content" ]; then
+            (echo "[!!!]用户 $username 的定时任务如下:" && echo "$crontab_content") | $Ashro_saveresult
+        fi
+    done
+else
+    echo "[!!!]未找到 /var/spool/cron/crontabs 目录，无法查找用户定时任务" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/crontab 文件
+if [ -f "/etc/crontab" ]; then
+    crontab_content=$(cat /etc/crontab 2>/dev/null)
+    if [ -n "$crontab_content" ]; then
+        (echo "[!!!]/etc/crontab 定时任务如下:" && echo "$crontab_content") | $Ashro_saveresult
+    fi
+else
+    echo "[!!!]未找到 /etc/crontab 文件，无法查找系统定时任务" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/cron.d 目录
+if [ -d "/etc/cron.d" ]; then
+    for cron_file in /etc/cron.d/*; do
+        cron_content=$(cat "$cron_file" 2>/dev/null)
+        if [ -n "$cron_content" ]; then
+            (echo "[!!!]$cron_file 定时任务如下:" && echo "$cron_content") | $Ashro_saveresult
+        fi
+    done
+else
+    echo "[!!!]未找到 /etc/cron.d 目录，无法查找系统定时任务" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/cron.hourly 目录
+if [ -d "/etc/cron.hourly" ]; then
+    (echo "[!!!]/etc/cron.hourly 定时任务目录存在。") | $Ashro_saveresult
+else
+    echo "[!!!]未找到 /etc/cron.hourly 目录" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/cron.daily 目录
+if [ -d "/etc/cron.daily" ]; then
+    (echo "[!!!]/etc/cron.daily 定时任务目录存在。") | $Ashro_saveresult
+else
+    echo "[!!!]未找到 /etc/cron.daily 目录" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/cron.weekly 目录
+if [ -d "/etc/cron.weekly" ]; then
+    (echo "[!!!]/etc/cron.weekly 定时任务目录存在。") | $Ashro_saveresult
+else
+    echo "[!!!]未找到 /etc/cron.weekly 目录" | tee -a "$danger_file" | $Ashro_saveresult
+fi
+
+# 检查 /etc/cron.monthly 目录
+if [ -d "/etc/cron.monthly" ]; then
+    (echo "[!!!]/etc/cron.monthly 定时任务目录存在。") | $Ashro_saveresult
+else
+    echo "[!!!]未找到 /etc/cron.monthly 目录" | tee -a "$danger_file" | $Ashro_saveresult
 fi
 
 printf "\n" | $Ashro_saveresult
@@ -864,4 +926,3 @@ else
 fi
 
 echo "检查结束！！！" | $Ashro_saveresult
-
