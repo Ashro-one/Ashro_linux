@@ -170,27 +170,36 @@ printf "\n" | $Ashro_saveresult
 
 # 检测暴力破解攻击
 echo "------------ 暴力破解攻击检测 --------------"
-echo "正在检测是否遭受暴力破解攻击....."
+echo "正在检测root是否遭受暴力破解攻击....."
 
 # 定义函数检测暴力破解攻击
 check_bruteforce() {
     logfile="$1"
     danger_file="/var/log/danger.log"  # 定义危险日志文件路径
 
-    if [ -f "$logfile" ]; then
-        failed_attempts=$(grep "Failed password" "$logfile" | awk '{print $11}' | sort | uniq -c | sort -nr | tee -a "$danger_file" | more)
-        if [ "$failed_attempts" -gt 5 ]; then
-            echo "[!!!] 在 $logfile 中检测到 $failed_attempts 次失败密码尝试，可能遭受暴力破解攻击！" | tee -a "$danger_file"
-        else
-            echo "[*] 在 $logfile 中暴力破解攻击检测正常"
-        fi
-    else
+    if [ ! -f "$logfile" ]; then
         echo "[*] $logfile 不存在，暴力破解攻击检测未执行"
+        return
+    fi
+
+    # 检测失败的root密码尝试并输出结果
+    result=$(grep -a "Failed password for root" "$logfile" | awk '{print $11}' | sort | uniq -c | sort -nr)
+    loginresult=$(grep "Accepted password for root" "$logfile" | awk '{print $11}' | sort | uniq -c | sort -nr | more)
+
+    if [ -n "$result" ]; then
+        echo "[!!!] 在 $logfile 中检测到失败密码尝试，可能遭受暴力破解攻击！" | tee -a "$danger_file"
+        echo "详细信息如下：" | tee -a "$danger_file"
+        echo "------------------------" | tee -a "$danger_file"
+        echo "$result" | tee -a "$danger_file" | more
+	echo "登录成功的ip如下:""$loginresult"| tee -a "$danger_file" 
+    else
+        echo "[*] 在 $logfile 中暴力破解攻击检测正常"
     fi
 }
 
 # 调用函数检测暴力破解攻击
 check_bruteforce "/var/log/auth.log"
+check_bruteforce "/var/log/auth.log*"
 check_bruteforce "/var/log/secure"
 
 echo ""  # 输出一个空行
