@@ -178,7 +178,7 @@ check_bruteforce() {
     danger_file="/var/log/danger.log"  # 定义危险日志文件路径
 
     if [ -f "$logfile" ]; then
-        failed_attempts=$(grep "Failed password" "$logfile" | wc -l)
+        failed_attempts=$(grep "Failed password" "$logfile" | awk '{print $11}' | sort | uniq -c | sort -nr | tee -a "$danger_file" | more)
         if [ "$failed_attempts" -gt 5 ]; then
             echo "[!!!] 在 $logfile 中检测到 $failed_attempts 次失败密码尝试，可能遭受暴力破解攻击！" | tee -a "$danger_file"
         else
