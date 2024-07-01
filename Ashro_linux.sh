@@ -168,22 +168,24 @@ check_permission "/etc/gshadow"
 
 printf "\n" | $Ashro_saveresult
 
-# 暴力破解攻击检测
-echo "------------ 暴力破解攻击检测 --------------" | $Ashro_saveresult
-echo "正在检测是否遭受暴力破解攻击....." | $Ashro_saveresult
+# 检测暴力破解攻击
+echo "------------ 暴力破解攻击检测 --------------"
+echo "正在检测是否遭受暴力破解攻击....."
 
 # 定义函数检测暴力破解攻击
 check_bruteforce() {
     logfile="$1"
+    danger_file="/var/log/danger.log"  # 定义危险日志文件路径
+
     if [ -f "$logfile" ]; then
         failed_attempts=$(grep "Failed password" "$logfile" | wc -l)
         if [ "$failed_attempts" -gt 5 ]; then
-            echo "[!!!] $logfile 中检测到 $failed_attempts 次失败密码尝试，可能遭受暴力破解攻击！" | tee -a "$danger_file" | $Ashro_saveresult
+            echo "[!!!] 在 $logfile 中检测到 $failed_attempts 次失败密码尝试，可能遭受暴力破解攻击！" | tee -a "$danger_file"
         else
-            echo "[*] $logfile 中暴力破解攻击检测正常" | $Ashro_saveresult
+            echo "[*] 在 $logfile 中暴力破解攻击检测正常"
         fi
     else
-        echo "[*] $logfile 不存在，暴力破解攻击检测未执行" | $Ashro_saveresult
+        echo "[*] $logfile 不存在，暴力破解攻击检测未执行"
     fi
 }
 
@@ -191,7 +193,7 @@ check_bruteforce() {
 check_bruteforce "/var/log/auth.log"
 check_bruteforce "/var/log/secure"
 
-printf "\n" | $Ashro_saveresult
+echo ""  # 输出一个空行
 # 检测端口进程信息
 echo "************3.端口进程信息************"
 echo "------------网络连接---------------------" | $Ashro_saveresult
