@@ -23,6 +23,7 @@ Ashro_checkresult.txt   结尾的是脚本执行过程日志，这个比较友�
 
 <img width="509" alt="image" src="https://github.com/Ashro-one/Ashro_linux/assets/49979071/806d9e04-6890-401a-a2ad-11af64598e7c">
 
+
 详细功能介绍:<br>
 1.必须root权限运行<br>
 2.收集IP地址信息<br>
@@ -79,3 +80,11 @@ https://github.com/FindAllTeam/FindAll/
 
 
 感谢 theLSA 老哥提到的debian系统出现的定时任务出现找不到文件情况。目前已解决    2024.06.24
+
+
+补充一个应急小tip
+当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，
+例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
+find / -type f -exec grep -l "10.16.5.134" {} \; 
+![image](https://github.com/user-attachments/assets/6178f2c8-6853-4636-b3e8-7731b03aec26)
+
