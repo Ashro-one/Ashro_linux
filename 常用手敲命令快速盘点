@@ -43,4 +43,6 @@
   find / -type f -exec grep -l "10.16.5.134" {} \;
 20.定位是否存在除root之外的超级权限用户
   awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
-
+21.寻找文件内容中是否存在base64加密     
+  find / -type f -exec grep -l "base64 -d|bash" {} \;     
+  
