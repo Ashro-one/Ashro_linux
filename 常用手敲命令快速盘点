@@ -1,0 +1,11 @@
+适用于脚本无法上传 只能手敲的情况 快速定位风险点
+
+1.定位哪些用户登录
+  who
+2.判断存在哪些用户 
+  cat /etc/passwd
+  cat /etc/shadow
+3.新增用户检查
+  awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd
+3.定位是否存在除root之外的超级权限用户
+  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
