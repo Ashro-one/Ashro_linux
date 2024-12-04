@@ -85,6 +85,6 @@ https://github.com/FindAllTeam/FindAll/
 补充一个应急小tip
 当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，
 例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
-find / -type f -exec grep -l "10.16.5.134" {} \; 
+find / -type f -exec grep -l "10.16.5.134" {} \\; <br>
 ![image](https://github.com/user-attachments/assets/6178f2c8-6853-4636-b3e8-7731b03aec26)
 
