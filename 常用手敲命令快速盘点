@@ -1,4 +1,4 @@
-适用于脚本无法上传 只能手敲的情况 快速定位风险点<br>
+讲道理，脚本真的一般，不如手敲 快速定位风险点
 
 1.定位哪些用户登录
   who
@@ -25,7 +25,22 @@
   ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
 12.查找后台进程
   ps aux | grep -E '^\S+ +[0-9]+ +[0-9]+ .+\/.*'
-
-3.定位是否存在除root之外的超级权限用户
+13.查找内存使用率最高的进程
+  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%mem | head -n 5
+14.查询所有监听端口的网络连接是否存在反弹shell类进程
+  netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
+15.查找一周内具有执行权限的普通文件，并输出文件名和修改日期
+  find / -type f -mtime -7 -executable -not -path "/tmp/Ashro*" 2>/dev/null
+16.历史命令
+  cat /root/.bash_history
+17.查找系统定时任务
+  grep -v "# run-parts" /etc/crontab 2>/dev/null | grep run-parts
+  cat /etc/crontab
+  crontab -l
+18.查找指定日期内存在变动的文件
+  ind / -type f -newermt "2024-12-03" ! -newermt "2024-12-07" 2>/dev/nul | grep -E "\.(py|sh|per|pl|php|asp|jsp|txt)$"
+19.当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
+  find / -type f -exec grep -l "10.16.5.134" {} \;
+20.定位是否存在除root之外的超级权限用户
   awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
 
