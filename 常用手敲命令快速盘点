@@ -1,15 +1,31 @@
 适用于脚本无法上传 只能手敲的情况 快速定位风险点<br>
 
-1.定位哪些用户登录<br>
-  who<br>
-2.判断存在哪些用户 <br>
-  cat /etc/passwd<br>
-  cat /etc/shadow<br>
-3.新增用户检查<br>
-  awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd<br>
-4.遍历所有用户的家目录，如果 .ssh/authorized_keys 文件存在，就会输出警告信息并打印该文件的内容。<br>
-  getent passwd | cut -d: -f6 | xargs -I {} sh -c 'if [ -f "{}/.ssh/authorized_keys" ]; then echo "[!!!] 在用户 {} 下发现登录公钥：" && cat "{}/.ssh/authorized_keys"; fi'<br>
+1.定位哪些用户登录
+  who
+2.判断存在哪些用户 
+  cat /etc/passwd
+  cat /etc/shadow
+3.新增用户检查
+  awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd
+4.遍历所有用户的家目录，如果 .ssh/authorized_keys 文件存在，就会输出警告信息并打印该文件的内容。
+  getent passwd | cut -d: -f6 | xargs -I {} sh -c 'if [ -f "{}/.ssh/authorized_keys" ]; then echo "[!!!] 在用户 {} 下发现登录公钥：" && cat "{}/.ssh/authorized_keys"; fi'
+5.用户最后登录日志
+  last
+6.登录日志中检测是否遭受暴力破解攻击
+  grep -i 'failed' /var/log/auth.log* | grep -E 'password|authentication failure' | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip; do if [ "$count" -ge 5 ]; then echo "[!!!] IP $ip 可能正在进行暴力破解攻击，共有 $count 次失败尝试。"; fi; done
+7.查看系统当前建立的网络连接
+  netstat -tun | grep ESTABLISHED
+8.查看系统当前正在监听的端口
+  netstat -tuln | awk 'NR > 2 {print $4}' | awk -F':' '{print $NF}' | sort -nu
+9.列出正在监听端口的详细信息
+  lsof -i :$port | awk 'NR==1 || /LISTEN/'     #需要更改$port
+10.查看系统进程
+  ps -aux
+11.查看CPU使用率最高的进程
+  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
+12.查找后台进程
+  ps aux | grep -E '^\S+ +[0-9]+ +[0-9]+ .+\/.*'
 
-3.定位是否存在除root之外的超级权限用户<br>
-  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd<br>
+3.定位是否存在除root之外的超级权限用户
+  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
 
