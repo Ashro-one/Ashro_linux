@@ -1,11 +1,15 @@
-适用于脚本无法上传 只能手敲的情况 快速定位风险点
+适用于脚本无法上传 只能手敲的情况 快速定位风险点<br>
 
-1.定位哪些用户登录
-  who
-2.判断存在哪些用户 
-  cat /etc/passwd
-  cat /etc/shadow
-3.新增用户检查
-  awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd
-3.定位是否存在除root之外的超级权限用户
-  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
+1.定位哪些用户登录<br>
+  who<br>
+2.判断存在哪些用户 <br>
+  cat /etc/passwd<br>
+  cat /etc/shadow<br>
+3.新增用户检查<br>
+  awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd<br>
+4.遍历所有用户的家目录，如果 .ssh/authorized_keys 文件存在，就会输出警告信息并打印该文件的内容。<br>
+  getent passwd | cut -d: -f6 | xargs -I {} sh -c 'if [ -f "{}/.ssh/authorized_keys" ]; then echo "[!!!] 在用户 {} 下发现登录公钥：" && cat "{}/.ssh/authorized_keys"; fi'<br>
+
+3.定位是否存在除root之外的超级权限用户<br>
+  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd<br>
+
