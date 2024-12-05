@@ -1,5 +1,7 @@
 
-<h1>个人感觉，手敲还是挺好的</h1>
+<h1>个人感觉，手敲还是挺好的</h1><br>
+
+感谢 https://www.yuque.com/beicheni/  北辰老板的资料分享
 
 Linux通用应急响应脚本，适用大多数情况
 
@@ -83,7 +85,9 @@ https://github.com/FindAllTeam/FindAll/
 
 
 感谢 theLSA 老哥提到的debian系统出现的定时任务出现找不到文件情况。目前已解决    2024.06.24
-感谢 https://www.yuque.com/beicheni/  北辰老板的资料分享
+
+
+
 
 补充一个应急小tip<br>
 当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，<br>
