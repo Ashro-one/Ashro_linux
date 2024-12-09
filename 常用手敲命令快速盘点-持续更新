@@ -1,49 +1,197 @@
-讲道理，脚本真的一般，不如手敲 快速定位风险点
-
-1.定位哪些用户登录
+#用户方向
+# 定位哪些用户登录
   who
-2.判断存在哪些用户 
+# 查看哪些IP破解你SSH密码以及次数
+  cat /var/log/secure | awk '/Failed/{print $(NF-3)}' | sort | uniq -c | awk '{print $2" = "$1;}'
+# 登录失败的记录
+ grep -o "Failed password" /var/log/secure|uniq -c
+# 登录成功的记录
+ grep "Accepted " /var/log/secure | awk '{print $1,$2,$3,$9,$11}'
+# 登录日志中检测是否遭受暴力破解攻击
+  grep -i 'failed' /var/log/auth.log* | grep -E 'password|authentication failure' | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip; do if [ "$count" -ge 5 ]; then echo "[!!!] IP $ip 可能正在进行暴力破解攻击，共有 $count 次失败尝试。"; fi; done
+# 判断存在哪些用户 
   cat /etc/passwd
   cat /etc/shadow
-3.新增用户检查
+# 新增用户检查
   awk -F: '$3 >= 1000 && $3 != 65534' /etc/passwd
-4.遍历所有用户的家目录，如果 .ssh/authorized_keys 文件存在，就会输出警告信息并打印该文件的内容。
-  getent passwd | cut -d: -f6 | xargs -I {} sh -c 'if [ -f "{}/.ssh/authorized_keys" ]; then echo "[!!!] 在用户 {} 下发现登录公钥：" && cat "{}/.ssh/authorized_keys"; fi'
-5.用户最后登录日志
+#.用户最后登录日志
   last
-6.登录日志中检测是否遭受暴力破解攻击
-  grep -i 'failed' /var/log/auth.log* | grep -E 'password|authentication failure' | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip; do if [ "$count" -ge 5 ]; then echo "[!!!] IP $ip 可能正在进行暴力破解攻击，共有 $count 次失败尝试。"; fi; done
-7.查看系统当前建立的网络连接
-  netstat -tun | grep ESTABLISHED
-8.查看系统当前正在监听的端口
-  netstat -tuln | awk 'NR > 2 {print $4}' | awk -F':' '{print $NF}' | sort -nu
-9.列出正在监听端口的详细信息
-  lsof -i :$port | awk 'NR==1 || /LISTEN/'     #需要更改$port
-10.查看系统进程
-  ps -aux
-11.查看CPU使用率最高的进程
-  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
-12.查找后台进程
-  ps aux | grep -E '^\S+ +[0-9]+ +[0-9]+ .+\/.*'
-13.查找内存使用率最高的进程
-  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%mem | head -n 5
-14.查询所有监听端口的网络连接是否存在反弹shell类进程
-  netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
-15.查找一周内具有执行权限的普通文件，并输出文件名和修改日期
-  find / -type f -mtime -7 -executable -not -path "/tmp/Ashro*" 2>/dev/null
-16.历史命令
+# 遍历所有用户的家目录，如果 .ssh/authorized_keys 文件存在，就会输出警告信息并打印该文件的内容。
+  getent passwd | cut -d: -f6 | xargs -I {} sh -c 'if [ -f "{}/.ssh/authorized_keys" ]; then echo "[!!!] 在用户 {} 下发现登录公钥：" && cat "{}/.ssh/authorized_keys"; fi'
+# 查看历史命令
   cat /root/.bash_history
-17.查找系统定时任务
+  history
+
+#网络连接与进程
+#查看当前CPU使用情况
+  top
+# 查看系统当前建立的网络连接
+  netstat -tun | grep ESTABLISHED
+  netstat -anptl  
+# 查看系统当前正在监听的端口
+  netstat -tuln | awk 'NR > 2 {print $4}' | awk -F':' '{print $NF}' | sort -nu
+# 列出正在监听端口的详细信息
+  lsof -i :$port | awk 'NR==1 || /LISTEN/'     #需要更改$port
+# 查看系统进程
+  ps -aux
+
+# 查看上述进程文件调用情况
+ lsof -p PID
+#结束进程
+ kill -9 PID
+#结束进程组
+ kill -9 PGID
+# 查看CPU使用率最高的进程
+  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
+# 查找后台进程
+  ps aux | grep -E '^\S+ +[0-9]+ +[0-9]+ .+\/.*'
+# 查找内存使用率最高的进程
+  ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%mem | head -n 5
+#查看进程
+ ps -ef
+#隐藏进程查看
+  cat /proc/PID/mountinfo | grep proc  //隐藏进程查看 
+   进入sudo su root 权限，umount /proc/pid
+#查看运行目录
+ pwdx PID
+#进程运行时间
+ ps -eo pid,lstart.etime,cmd|grep pid
+#查看访问时间、创建时间
+ stat filepath
+#查看网络连接及运行程序
+ ss -nlpt
+# 查询所有监听端口的网络连接是否存在反弹shell类进程
+  netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
+# 查找7天内具有执行权限的普通文件，并输出文件名和修改日期
+  find / -type f -mtime -7 -executable
+# 指定目录下2天内新增的文件
+ find /tmp -ctime -2  
+# 指定目录下1天内修改的文件
+ find /home/ -type f -mtime -1    //指定目录下1天内修改的文件
+# 指定日期修改的文件
+ find /home/ -type f -newermt 2022-03-22 
+# 查找指定日期内存在变动的文件
+  ind / -type f -newermt "2024-12-03" ! -newermt "2024-12-07" 2>/dev/nul | grep -E "\.(py|sh|per|pl|php|asp|jsp|txt)$"
+# 寻找当前目录下文件内容中是否存在base64加密     
+  find . -type f -exec grep -l "base64 -d|bash" {} \;
+  find . -type f -exec grep -l "base64_decode" {} \;
+# 当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
+  find / -type f -exec grep -l "10.16.5.134" {} \;
+# find 常用语法
+#find / -mtime -n +n     //-n是n天内  +n指n天前修改文件 
+#find / -name "*.xls"                //查找指定文件
+#find . -type f |grep -i \.*filename    //在当前目录及其子目录中查找包含指定文件名（不区分大小写）的文件
+
+
+#.查找系统定时任务
   grep -v "# run-parts" /etc/crontab 2>/dev/null | grep run-parts
   cat /etc/crontab
   crontab -l
-18.查找指定日期内存在变动的文件
-  ind / -type f -newermt "2024-12-03" ! -newermt "2024-12-07" 2>/dev/nul | grep -E "\.(py|sh|per|pl|php|asp|jsp|txt)$"
-19.当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
-  find / -type f -exec grep -l "10.16.5.134" {} \;
-20.定位是否存在除root之外的超级权限用户
-  awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd
-21.寻找当前目录下文件内容中是否存在base64加密     
-  find . -type f -exec grep -l "base64 -d|bash" {} \;
-  find . -type f -exec grep -l "base64_decode" {} \;
-  
+ crontab -e //进入删除计划任务配置
+  lsattr -a  /var/spool/cron/   #查看任务权限
+  chattr -a /var/spool/cron/  #修改任务读写权限
+  lsatter filename   #查看文件属性
+  chattr -i filename  #移除i属性来删除文件
+  journalctl -unit app |grep key #查看指定服务日志
+service warm status #排查服务运行情况
+ service warm stop  #停止服务命令
+ systemctl status PID  #查看服务关联进程
+ macro.Melissa suspicious #宏病毒恶意代码特征
+ cat /etc/shadow   #查看影子文件
+ last -f /var/log/wtmp  #查看可疑IP登陆
+
+ 
+
+
+
+其他日志分析
+/var/log/message       //包括整体系统信息
+/var/log/auth.log        //包含系统授权信息，包括用户登录和使用的权限机制等
+/var/log/userlog       //记录所有等级用户信息的日志
+/var/log/cron          //记录crontab命令是否被正确的执行
+/var/log/xferlog(vsftpd.log)   //记录Linux FTP日志
+/var/log/lastlog       //记录登录的用户，可以使用命令lastlog查看
+/var/log/secure     //记录大多数应用输入的账号与密码，登录成功与否
+/var/log/wtmp     //记录登录系统成功的账户信息，等同于命令last
+/var/log/faillog     //记录登录系统不成功的账号信息，一般会被黑客删除 如果开启了一些服务，也需要对服务运行的日志进行排查
+cat  /var/log/boot.log    //查看所有进程启动和停止相关的日志信息
+vim  /var/log/maillog    //查看邮件相关的日志信息
+cat  /var/log/spooler    //查看新闻群组方面相关的日志信息
+cat  /var/log/dmesg    //查看Linux操作系统在引导过程中的各种事件信息
+
+定时任务保存位置
+var/spool/cron/*   
+/var/spool/anacron/*
+/etc/crontab
+/etc/anacrontab
+/etc/cron.*      
+/etc/anacrontab
+/etc/cron.d
+/etc/cron.daily
+/etc/cron.hourly
+/etc/cron.monthly
+/etc/rc.d/init.d/    
+
+
+nc 传文件
+nc -lp 4444 < filename
+nc -nv ip  port > filename -w 1    //nc下载服务器文件 
+
+rm -rf 文件名 出现rm: cannot remove '文件名' : Permission denied
+说明有隐藏权限，查看隐藏权限lsattr 文件名 如果没有，返回上一级目录重复进行lsattr+文件名 然后
+修改权限chattr -i /文件名 然后再进行删除
+
+
+
+内存马排查
+
+#jsp框架，日志中排查可疑jsp的访问请求。
+如果是代码执行漏洞，排查中间件的error.log,查看是否有可以的报错，判断注入时间和方法。
+根据业务使用的组件排查是否可能存在java代码执行漏洞以及是否存在webshell，排查框架漏洞，反序列化漏洞。
+如果是servlet或者spring的controller类型，根据上报的webshell的url查找日志（日志可能被关闭，不一定有，根据url最早访问时间确定被注入时间）
+如果是filter或者listener类型，可能会有较多的404但是带有参数的请求，或者大量请求不同url但带有相同的参数，或者页面不存在但返回200.
+
+tomcat-memshell-scanner.jsp
+
+
+windwos
+
+netstat -ano 检查端口连接情况，是否有远程连接、可疑连接
+tasklist | findstr "PID"根据pid定位进程
+msconfig看一下启动项是否有可以的启动
+%UserProfile%\Recent   最近访问的文件夹
+netstat -ano   //网络连接
+tasklist |findstr PID  //通过PID查看进程
+msconfig   //服务项
+tasklist /svc    //进程
+resmon cpu  //使用情况
+compmgmt.msc      //计算机-管理 计划任务，日志查询
+eventvwr.msc   事件查看器
+lusrmgr.msc  //用户与组
+services.msc  //服务
+net user  //获取用户列表
+net session  //查看当前会话
+net use   //远程连接
+net share   //查看当前用户的共享目录
+net start   //查看当前运行的服务
+net localgroup administrators  //本机管理员
+certutil -hashfile 文件名 MD5     //获取md5值命令
+ncpa.cpl  //打开网络连接
+wmic process where Name=”cmd.exe” get ParentProcessId  //查看对应父进程
+ wmic process get caption,commandline /value >> tmp.txt   //分析进程参数
+ wmic process where caption="svchost.exe" get caption,commandline /value   //分析指定进程命令行参数 
+
+
+
+
+数据库
+
+
+具体的位置和寻找方式因为数据库软件和操作系统的版本不同而异，以下是一些常用数据库和操作系统的日志和配置文件位置：
+1. MySQL：MySQL 的日志文件通常位于 /var/log/mysql/ 目录下，可以通过 mysqladmin 工具查看。MySQL 的配置文件为 my.cnf，通常位于 /etc/mysql/ 或 /etc/ 目录下。
+2. Oracle：Oracle 的日志文件名称和位置取决于其日志配置的设置，可以通过 Log File Viewer 查看。Oracle 的配置文件为 init.ora 或 spfile.ora，通常位于 $ORACLE_HOME/dbs/ 目录下。
+3. SQL Server：SQL Server 的日志文件位于 SQL Server 的数据目录中，例如 C:\Program Files\Microsoft SQL Server\MSSQL10_50.\MSSQL\Log 目录下。SQL Server 的配置文件为 SQL Server Configuration Manager，可以在 SQL Server Configuration Manager 中查看。
+4. PostgreSQL：PostgreSQL 的日志文件位于 /var/log/postgresql/ 目录下，可以使用 pgAdmin 管理工具查看。PostgreSQL 的配置文件为 postgresql.conf，通常位于 /etc/postgres/ 或 /usr/local/pgsql/data/ 目录下。
+5. Linux 系统：Linux 系统的日志文件通常位于 /var/log/ 目录下，如 /var/log/auth.log、/var/log/syslog 等。Linux 系统的配置文件通常位于 /etc/ 目录下，如 /etc/passwd、/etc/group 等。
+
+
