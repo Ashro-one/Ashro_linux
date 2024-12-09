@@ -4,9 +4,11 @@
 # 查看哪些IP破解你SSH密码以及次数
   cat /var/log/secure | awk '/Failed/{print $(NF-3)}' | sort | uniq -c | awk '{print $2" = "$1;}'
 # 登录失败的记录
- grep -o "Failed password" /var/log/secure|uniq -c
+  grep -o "Failed password" /var/log/secure|uniq -c
 # 登录成功的记录
- grep "Accepted " /var/log/secure | awk '{print $1,$2,$3,$9,$11}'
+  grep "Accepted " /var/log/secure | awk '{print $1,$2,$3,$9,$11}'
+#查看可疑IP登陆
+  last -f /var/log/wtmp 
 # 登录日志中检测是否遭受暴力破解攻击
   grep -i 'failed' /var/log/auth.log* | grep -E 'password|authentication failure' | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | while read count ip; do if [ "$count" -ge 5 ]; then echo "[!!!] IP $ip 可能正在进行暴力破解攻击，共有 $count 次失败尝试。"; fi; done
 # 判断存在哪些用户 
@@ -22,7 +24,8 @@
   cat /root/.bash_history
   history
 
-#网络连接与进程
+
+#===网络连接与进程
 #查看当前CPU使用情况
   top
 # 查看系统当前建立的网络连接
@@ -32,36 +35,41 @@
   netstat -tuln | awk 'NR > 2 {print $4}' | awk -F':' '{print $NF}' | sort -nu
 # 列出正在监听端口的详细信息
   lsof -i :$port | awk 'NR==1 || /LISTEN/'     #需要更改$port
+#查看网络连接及运行程序
+ ss -nlpt
+# 查询所有监听端口的网络连接是否存在反弹shell类进程
+  netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
 # 查看系统进程
   ps -aux
-
-# 查看上述进程文件调用情况
- lsof -p PID
-#结束进程
- kill -9 PID
-#结束进程组
- kill -9 PGID
 # 查看CPU使用率最高的进程
   ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
 # 查找后台进程
   ps aux | grep -E '^\S+ +[0-9]+ +[0-9]+ .+\/.*'
 # 查找内存使用率最高的进程
   ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%mem | head -n 5
-#查看进程
- ps -ef
 #隐藏进程查看
   cat /proc/PID/mountinfo | grep proc  //隐藏进程查看 
-   进入sudo su root 权限，umount /proc/pid
+  #进入sudo su root 权限，umount /proc/pid
 #查看运行目录
  pwdx PID
 #进程运行时间
  ps -eo pid,lstart.etime,cmd|grep pid
 #查看访问时间、创建时间
  stat filepath
-#查看网络连接及运行程序
- ss -nlpt
-# 查询所有监听端口的网络连接是否存在反弹shell类进程
-  netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
+#查看进程
+ ps -ef
+# 查看上述进程文件调用情况
+ lsof -p PID
+#结束进程
+ kill -9 PID
+#结束进程组
+ kill -9 PGID
+
+#====文件变更
+# find 常用语法
+#find / -mtime -n +n     //-n是n天内  +n指n天前修改文件 
+#find / -name "*.xls"                //查找指定文件
+#find . -type f |grep -i \.*filename    //在当前目录及其子目录中查找包含指定文件名（不区分大小写）的文件
 # 查找7天内具有执行权限的普通文件，并输出文件名和修改日期
   find / -type f -mtime -7 -executable
 # 指定目录下2天内新增的文件
@@ -77,28 +85,24 @@
   find . -type f -exec grep -l "base64_decode" {} \;
 # 当漏扫工具被截留到服务器上时候，还定位不到攻击者遗留的工具时，例如ips上出现横向攻击10.16.5.134 时，可以执行如下命令。 他会查找全系统文件内容中的可能存在漏洞结果的文件位置。
   find / -type f -exec grep -l "10.16.5.134" {} \;
-# find 常用语法
-#find / -mtime -n +n     //-n是n天内  +n指n天前修改文件 
-#find / -name "*.xls"                //查找指定文件
-#find . -type f |grep -i \.*filename    //在当前目录及其子目录中查找包含指定文件名（不区分大小写）的文件
 
 
+#===后门类型
 #.查找系统定时任务
   grep -v "# run-parts" /etc/crontab 2>/dev/null | grep run-parts
   cat /etc/crontab
   crontab -l
- crontab -e //进入删除计划任务配置
+  crontab -e //进入删除计划任务配置
   lsattr -a  /var/spool/cron/   #查看任务权限
   chattr -a /var/spool/cron/  #修改任务读写权限
   lsatter filename   #查看文件属性
   chattr -i filename  #移除i属性来删除文件
-  journalctl -unit app |grep key #查看指定服务日志
-service warm status #排查服务运行情况
- service warm stop  #停止服务命令
- systemctl status PID  #查看服务关联进程
- macro.Melissa suspicious #宏病毒恶意代码特征
- cat /etc/shadow   #查看影子文件
- last -f /var/log/wtmp  #查看可疑IP登陆
+  journalctl -unit app |grep key #查看指定服务日志 
+  service warm status #排查服务运行情况
+  service warm stop  #停止服务命令
+  systemctl status PID  #查看服务关联进程
+  macro.Melissa suspicious #宏病毒恶意代码特征
+ 
 
  
 
@@ -131,16 +135,6 @@ var/spool/cron/*
 /etc/cron.hourly
 /etc/cron.monthly
 /etc/rc.d/init.d/    
-
-
-nc 传文件
-nc -lp 4444 < filename
-nc -nv ip  port > filename -w 1    //nc下载服务器文件 
-
-rm -rf 文件名 出现rm: cannot remove '文件名' : Permission denied
-说明有隐藏权限，查看隐藏权限lsattr 文件名 如果没有，返回上一级目录重复进行lsattr+文件名 然后
-修改权限chattr -i /文件名 然后再进行删除
-
 
 
 内存马排查
