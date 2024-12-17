@@ -54,6 +54,8 @@ ls -la /etc/*.so
   #进入sudo su root 权限，umount /proc/pid
 #查看运行目录
  pwdx PID
+#查看运行进程原文件
+find / -name <进程名>
 #进程运行时间
  ps -eo pid,lstart.etime,cmd|grep pid
 #查看访问时间、创建时间
