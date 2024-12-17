@@ -52,6 +52,11 @@ ls -la /etc/*.so
 #隐藏进程查看
   cat /proc/PID/mountinfo | grep proc  //隐藏进程查看 
   #进入sudo su root 权限，umount /proc/pid
+#另一种方法
+ps -ef| awk '{print}' |sort -n|uniq >1
+ls /proc |sort -n|uniq >2
+diff 1 2
+
 #查看运行目录
  pwdx PID
 #查看运行进程原文件
@@ -91,11 +96,14 @@ find / -name <进程名>
   find / -type f -exec grep -l "10.16.5.134" {} \;
 
 
+
+
 #===后门类型
 #.查找系统定时任务
   grep -v "# run-parts" /etc/crontab 2>/dev/null | grep run-parts
   cat /etc/crontab
-  crontab -l
+  ls /etc/cron*   #查看所有计划任务
+  crontab -l    #windows 自启动目录
   crontab -e //进入删除计划任务配置
   lsattr -a  /var/spool/cron/   #查看任务权限
   chattr -a /var/spool/cron/  #修改任务读写权限
@@ -106,10 +114,29 @@ find / -name <进程名>
   service warm stop  #停止服务命令
   systemctl status PID  #查看服务关联进程
   macro.Melissa suspicious #宏病毒恶意代码特征
- 
+  
+  定时任务保存位置
+  var/spool/cron/*   
+  /var/spool/anacron/*
+  /etc/crontab
+  /etc/anacrontab
+  /etc/cron.*      
+  /etc/anacrontab
+  /etc/cron.d
+  /etc/cron.daily
+  /etc/cron.hourly
+  /etc/cron.monthly
+  /etc/rc.d/init.d/  
 
- 
 
+  2.启动项排查
+  cat /etc/init.d/rc.local  查看init.d文件夹下的rc.local文件内容
+  cat /etc/rc.local
+  ls -alt /etc/init.d
+
+  3.映像劫持检查：
+  lsmod | grep -v "^Module"    查看是否加载可疑模块
+  ps aux | less                查看是否开启非系统进程
 
 
 其他日志分析
@@ -126,19 +153,7 @@ cat  /var/log/boot.log    //查看所有进程启动和停止相关的日志信�
 vim  /var/log/maillog    //查看邮件相关的日志信息
 cat  /var/log/spooler    //查看新闻群组方面相关的日志信息
 cat  /var/log/dmesg    //查看Linux操作系统在引导过程中的各种事件信息
-
-定时任务保存位置
-var/spool/cron/*   
-/var/spool/anacron/*
-/etc/crontab
-/etc/anacrontab
-/etc/cron.*      
-/etc/anacrontab
-/etc/cron.d
-/etc/cron.daily
-/etc/cron.hourly
-/etc/cron.monthly
-/etc/rc.d/init.d/    
+  
 
 
 内存马排查
@@ -176,8 +191,12 @@ net localgroup administrators  //本机管理员
 certutil -hashfile 文件名 MD5     //获取md5值命令
 ncpa.cpl  //打开网络连接
 wmic process where Name=”cmd.exe” get ParentProcessId  //查看对应父进程
- wmic process get caption,commandline /value >> tmp.txt   //分析进程参数
- wmic process where caption="svchost.exe" get caption,commandline /value   //分析指定进程命令行参数 
+wmic process get caption,commandline /value >> tmp.txt   //分析进程参数
+wmic process where caption="svchost.exe" get caption,commandline /value   //分析指定进程命令行参数 
+#windows 自启动目录
+C:\Users\用户名\AppData\Roaming\Microsoft\Windows\start Menu\Programs\Startup
+C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup
+
 
 
 
