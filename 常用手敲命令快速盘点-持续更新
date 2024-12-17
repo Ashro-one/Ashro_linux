@@ -41,6 +41,8 @@
   netstat -tuln | grep -E "nc -l -p|netcat|ncat|socat|shell|bind|reverse|listen|connect|exec|sh|bash|zsh|ksh|telnet|ssh|rsh|rcp|sshpass|pexpect|paramiko|plink|pscp|putty|ssh-keygen|ssh-agent|tsh|rbash|dash|mkfifo|expect|bash -c|python -c|perl -e|curl|wget|php -r|lua -e|bash -i|php -a|python -m|perl -M|ruby -e|perl -n|python -p|ruby -n|bash -s|php -l|wget -O|curl -o
 # 查看系统进程
   ps -aux
+#当查看进程时，发现进程存在，但是没有进程文件以及进程id时，可以查看/etc/*.so文件，判断是不是进行了动态链接库隐藏，
+ls -la /etc/*.so
 # 查看CPU使用率最高的进程
   ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5
 # 查找后台进程
